@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nuclear-kinematics"
+version = "0.1.0"
+description = "Relativistic kinematics calculator for two-body nuclear reactions"
+requires-python = ">=3.9"
+dependencies = [
+    "vector",
+    "hepunits",
+    "nuclearmasses",
+    "numpy",
+    "scipy",
+    "PySide6",
+]
+
+[project.scripts]
+nuclear-kinematics = "nuclear_kinematics.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nuclear_kinematics*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

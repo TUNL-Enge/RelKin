@@ -1,0 +1,17 @@
+# Claude local settings
+.claude/settings.local.json
+
+# Virtual environment
+venv/
+
+# Python build artifacts
+__pycache__/
+*.pyc
+build/
+nuclear_kinematics.egg-info/
+
+# Editor temp files
+.#*
+
+# Logs
+ralph-logs/
