@@ -25,7 +25,7 @@ from nuclear_kinematics.core.kinematics import (
     max_lab_angle,
     threshold_energy,
 )
-from nuclear_kinematics.core.masses import get_mass_MeV, load_ame2020, parse_nuclide, qvalue
+from nuclear_kinematics.core.masses import format_nuclide, get_mass_MeV, load_ame2020, parse_nuclide, qvalue
 
 
 class KinematicsApp(QWidget):
@@ -54,6 +54,10 @@ class KinematicsApp(QWidget):
         self.inp_B = QLineEdit("12C")
         grid.addWidget(self.inp_B, 3, 1)
         reaction_group.setLayout(grid)
+
+        self.inp_a.textChanged.connect(self._auto_fill_B)
+        self.inp_A.textChanged.connect(self._auto_fill_B)
+        self.inp_b.textChanged.connect(self._auto_fill_B)
         layout.addWidget(reaction_group)
 
         # Beam energy
@@ -87,6 +91,25 @@ class KinematicsApp(QWidget):
         self.output.setReadOnly(True)
         self.output.setFont(QFont("Courier"))
         layout.addWidget(self.output)
+
+    def _auto_fill_B(self):
+        try:
+            Za, Aa = parse_nuclide(self.inp_a.text().strip())
+            ZA, AA = parse_nuclide(self.inp_A.text().strip())
+            Zb, Ab = parse_nuclide(self.inp_b.text().strip())
+        except ValueError:
+            return
+        ZB = Za + ZA - Zb
+        AB = Aa + AA - Ab
+        if ZB < 0 or AB <= 0:
+            return
+        try:
+            text = format_nuclide(ZB, AB)
+        except ValueError:
+            return
+        self.inp_B.blockSignals(True)
+        self.inp_B.setText(text)
+        self.inp_B.blockSignals(False)
 
     def _calculate(self):
         try:

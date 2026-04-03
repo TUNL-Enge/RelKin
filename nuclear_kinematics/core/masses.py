@@ -104,6 +104,15 @@ def parse_nuclide(s: str) -> tuple[int, int]:
     raise ValueError(f"Cannot parse nuclide string: {s!r}")
 
 
+def format_nuclide(Z: int, A: int) -> str:
+    """Return canonical nuclide string, e.g. format_nuclide(6, 12) → '12C'."""
+    if Z == 0 and A == 1:
+        return "n"
+    if Z < 1 or Z > len(_SYMBOLS):
+        raise ValueError(f"Z={Z} out of range")
+    return f"{A}{_SYMBOLS[Z - 1]}"
+
+
 def qvalue(
     ZA: tuple[int, int],
     ZB: tuple[int, int],
