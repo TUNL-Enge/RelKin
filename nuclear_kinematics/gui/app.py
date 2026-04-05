@@ -86,6 +86,10 @@ class KinematicsApp(QWidget):
         self.calc_btn.clicked.connect(self._calculate)
         layout.addWidget(self.calc_btn)
 
+        for field in (self.inp_a, self.inp_A, self.inp_b, self.inp_B,
+                      self.inp_energy, self.inp_angle):
+            field.returnPressed.connect(self.calc_btn.click)
+
         # Output
         self.output = QTextEdit()
         self.output.setReadOnly(True)
