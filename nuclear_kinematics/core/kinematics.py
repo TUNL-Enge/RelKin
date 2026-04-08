@@ -140,6 +140,7 @@ def lab_to_cm_solutions(
     num = (s - (m_b + m_B)**2) * (s - (m_b - m_B)**2)
     p_star   = np.sqrt(max(num, 0.0)) / (2.0 * sqrts)
     E_star_b = (s + m_b**2 - m_B**2) / (2.0 * sqrts)
+    E_star_B = sqrts - E_star_b
 
     Q = m_a + m_A - m_b - m_B
     cos_lab = np.cos(theta_lab)
@@ -147,10 +148,20 @@ def lab_to_cm_solutions(
     def _make_solution(cos_cm: float) -> dict:
         cos_cm = float(np.clip(cos_cm, -1.0, 1.0))
         theta_cm = float(np.arccos(cos_cm))
+        sin_cm = float(np.sqrt(max(1.0 - cos_cm**2, 0.0)))
         E_b_lab = gamma * (E_star_b + beta * p_star * cos_cm)
         T_b_lab = float(E_b_lab - m_b)
         T_B_lab = float(T_a + Q - T_b_lab)
-        return {'theta_b_cm': theta_cm, 'T_b_lab': T_b_lab, 'T_B_lab': T_B_lab}
+        # Lorentz boost for residual B (travels opposite to b in CM frame)
+        pz_B_lab = gamma * (-p_star * cos_cm + beta * E_star_B)
+        pt_B_lab = p_star * sin_cm
+        theta_B_lab = float(np.arctan2(pt_B_lab, pz_B_lab))
+        return {
+            'theta_b_cm': theta_cm,
+            'T_b_lab': T_b_lab,
+            'T_B_lab': T_B_lab,
+            'theta_B_lab': theta_B_lab,
+        }
 
     # Special case: theta_lab = 90° (tan undefined, cos = 0)
     if abs(cos_lab) < 1e-12:
