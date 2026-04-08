@@ -94,11 +94,30 @@ class KinematicsApp(QWidget):
                       self.inp_energy, self.inp_angle):
             field.returnPressed.connect(self.calc_btn.click)
 
-        # Output
-        self.output = QTextEdit()
-        self.output.setReadOnly(True)
-        self.output.setFont(QFont("Courier"))
-        layout.addWidget(self.output)
+        # Global metrics (scalar quantities)
+        self.metrics_text = QTextEdit()
+        self.metrics_text.setReadOnly(True)
+        self.metrics_text.setFont(QFont("Courier"))
+        self.metrics_text.setMaximumHeight(160)
+        layout.addWidget(self.metrics_text)
+
+        # Per-solution results table
+        headers = [
+            "Sol",
+            "\u03b8_b_cm (deg)",
+            "T_b_lab (MeV)",
+            "\u03b8_b_lab (deg)",
+            "T_B_lab (MeV)",
+            "\u03b8_B_cm (deg)",
+            "\u03b8_B_lab (deg)",
+            "kp (rad\u207b\u00b9)",
+        ]
+        self.results_table = QTableWidget(0, len(headers))
+        self.results_table.setHorizontalHeaderLabels(headers)
+        self.results_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.results_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.results_table.setMaximumHeight(120)
+        layout.addWidget(self.results_table)
 
     def _auto_fill_B(self):
         try:
@@ -138,7 +157,7 @@ class KinematicsApp(QWidget):
             theta_lab_rad = np.radians(theta_lab_deg)
 
         except (ValueError, KeyError) as e:
-            self.output.setPlainText(f"Input error: {e}")
+            self.metrics_text.setPlainText(f"Input error: {e}")
             return
 
         try:
@@ -149,9 +168,10 @@ class KinematicsApp(QWidget):
             max_ang = max_lab_angle(m_a, m_A, m_b, m_B, T_a)
             solutions = lab_to_cm_solutions(theta_lab_rad, m_a, m_A, m_b, m_B, T_a)
         except Exception as e:
-            self.output.setPlainText(f"Calculation error: {e}")
+            self.metrics_text.setPlainText(f"Calculation error: {e}")
             return
 
+        # --- Global metrics block ---
         lines = []
         lines.append(f"Q-value:          {Q:+.4f} MeV")
         lines.append(f"sqrt(s):          {sqrts:.4f} MeV")
@@ -165,34 +185,47 @@ class KinematicsApp(QWidget):
             lines.append(f"Max \u03b8_b_lab:       (full range)")
         lines.append(f"T_b_cm:           {T_b_cm:.4f} MeV")
         lines.append(f"T_B_cm:           {T_B_cm:.4f} MeV")
-        lines.append("")
+        self.metrics_text.setPlainText("\n".join(lines))
+
+        # --- Per-solution table ---
+        self.results_table.setRowCount(0)
 
         if T_thresh > 0 and T_a < T_thresh:
-            lines.append(
-                f"WARNING: T_a = {T_a:.4f} MeV is below threshold {T_thresh:.4f} MeV"
+            self.metrics_text.append(
+                f"\nWARNING: T_a = {T_a:.4f} MeV is below threshold {T_thresh:.4f} MeV"
             )
         elif not solutions:
-            lines.append(
-                f"No solution: \u03b8_b_lab = {theta_lab_deg:.4f} deg exceeds the kinematic limit"
+            self.metrics_text.append(
+                f"\nNo solution: \u03b8_b_lab = {theta_lab_deg:.4f} deg exceeds the kinematic limit"
             )
         else:
-            for i, sol in enumerate(solutions, 1):
-                lines.append(
-                    f"Solution {i}  (\u03b8_b_cm = {np.degrees(sol['theta_b_cm']):.4f} deg):"
-                )
-                lines.append(f"  T_b_lab:  {sol['T_b_lab']:.4f} MeV")
-                lines.append(f"  T_B_lab:  {sol['T_B_lab']:.4f} MeV")
+            self.results_table.setRowCount(len(solutions))
+            for i, sol in enumerate(solutions):
+                theta_b_cm_deg = np.degrees(sol['theta_b_cm'])
+                theta_B_cm_deg = 180.0 - theta_b_cm_deg
+                theta_B_lab_deg = np.degrees(sol['theta_B_lab'])
                 kp = kinematic_compression(sol["theta_b_cm"], m_a, m_A, m_b, m_B, T_a)[0]
-                lines.append(f"  kp:       {kp:.4f} rad^-1")
-                if i < len(solutions):
-                    lines.append("")
 
-        self.output.setPlainText("\n".join(lines))
+                values = [
+                    f"{i + 1}",
+                    f"{theta_b_cm_deg:.4f}",
+                    f"{sol['T_b_lab']:.4f}",
+                    f"{theta_lab_deg:.4f}",
+                    f"{sol['T_B_lab']:.4f}",
+                    f"{theta_B_cm_deg:.4f}",
+                    f"{theta_B_lab_deg:.4f}",
+                    f"{kp:.4f}",
+                ]
+                for col, val in enumerate(values):
+                    item = QTableWidgetItem(val)
+                    self.results_table.setItem(i, col, item)
+
+            self.results_table.resizeColumnsToContents()
 
 
 def main():
     app = QApplication(sys.argv)
     window = KinematicsApp()
-    window.resize(420, 560)
+    window.resize(600, 800)
     window.show()
     sys.exit(app.exec())
