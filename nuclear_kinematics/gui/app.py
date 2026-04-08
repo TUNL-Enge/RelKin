@@ -109,12 +109,14 @@ class KinematicsApp(QWidget):
         # Per-solution results table
         headers = [
             "Sol",
-            "\u03b8_b_cm (deg)",
             "T_b_lab (MeV)",
             "\u03b8_b_lab (deg)",
+            "T_b_cm (MeV)",
+            "\u03b8_b_cm (deg)",
             "T_B_lab (MeV)",
-            "\u03b8_B_cm (deg)",
             "\u03b8_B_lab (deg)",
+            "T_B_cm (MeV)",
+            "\u03b8_B_cm (deg)",
             "kp (rad\u207b\u00b9)",
         ]
         self.results_table = QTableWidget(0, len(headers))
@@ -218,12 +220,14 @@ class KinematicsApp(QWidget):
 
                 values = [
                     f"{i + 1}",
-                    f"{theta_b_cm_deg:.4f}",
                     f"{sol['T_b_lab']:.4f}",
                     f"{theta_lab_deg:.4f}",
+                    f"{T_b_cm:.4f}",
+                    f"{theta_b_cm_deg:.4f}",
                     f"{sol['T_B_lab']:.4f}",
-                    f"{theta_B_cm_deg:.4f}",
                     f"{theta_B_lab_deg:.4f}",
+                    f"{T_B_cm:.4f}",
+                    f"{theta_B_cm_deg:.4f}",
                     f"{kp:.4f}",
                 ]
                 for col, val in enumerate(values):
@@ -257,6 +261,6 @@ class KinematicsApp(QWidget):
 def main():
     app = QApplication(sys.argv)
     window = KinematicsApp()
-    window.resize(600, 800)
+    window.resize(950, 800)
     window.show()
     sys.exit(app.exec())
