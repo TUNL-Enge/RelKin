@@ -70,13 +70,12 @@ class KinematicsApp(QWidget):
         energy_group = QGroupBox("Beam Energy")
         energy_layout = QHBoxLayout()
         energy_layout.addWidget(QLabel("T_a:"))
-        self.inp_energy = QLineEdit("100.0")
+        self.inp_energy = QLineEdit("20.0")
         energy_layout.addWidget(self.inp_energy)
         self.energy_units = QComboBox()
         self.energy_units.addItems(["MeV", "MeV/u"])
         energy_layout.addWidget(self.energy_units)
         energy_group.setLayout(energy_layout)
-        layout.addWidget(energy_group)
 
         # Lab angle
         angle_group = QGroupBox("Lab Angle")
@@ -85,7 +84,11 @@ class KinematicsApp(QWidget):
         self.inp_angle = QLineEdit("30.0")
         angle_layout.addWidget(self.inp_angle)
         angle_group.setLayout(angle_layout)
-        layout.addWidget(angle_group)
+
+        beam_angle_row = QHBoxLayout()
+        beam_angle_row.addWidget(energy_group)
+        beam_angle_row.addWidget(angle_group)
+        layout.addLayout(beam_angle_row)
 
         # Calculate button
         self.calc_btn = QPushButton("Calculate")
@@ -245,7 +248,7 @@ class KinematicsApp(QWidget):
         T_a_display = float(self.inp_energy.text())
         units = self.energy_units.currentText()
         ax.set_title(
-            f"{a_text}({A_text},{b_text}){B_text}  T_a = {T_a_display:.1f} {units}"
+            f"{A_text}({a_text},{b_text}){B_text}  T_a = {T_a_display:.1f} {units}"
         )
         ax.grid(True)
         self.canvas.draw()
