@@ -19,6 +19,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
 
 from nuclear_kinematics.core.kinematics import (
     cm_energy,
@@ -118,6 +120,11 @@ class KinematicsApp(QWidget):
         self.results_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.results_table.setMaximumHeight(120)
         layout.addWidget(self.results_table)
+
+        # Kinematic locus plot
+        self.fig = Figure(figsize=(5, 3), tight_layout=True)
+        self.canvas = FigureCanvasQTAgg(self.fig)
+        layout.addWidget(self.canvas)
 
     def _auto_fill_B(self):
         try:
@@ -221,6 +228,27 @@ class KinematicsApp(QWidget):
                     self.results_table.setItem(i, col, item)
 
             self.results_table.resizeColumnsToContents()
+
+        self._update_plot(m_a, m_A, m_b, m_B, T_a)
+
+    def _update_plot(self, m_a, m_A, m_b, m_B, T_a):
+        self.fig.clear()
+        ax = self.fig.add_subplot(111)
+        theta_deg, T_lab = kinematic_locus(m_a, m_A, m_b, m_B, T_a)
+        ax.plot(theta_deg, T_lab, color="steelblue")
+        ax.set_xlabel("\u03b8_b_lab (deg)")
+        ax.set_ylabel("T_b_lab (MeV)")
+        a_text = self.inp_a.text().strip()
+        A_text = self.inp_A.text().strip()
+        b_text = self.inp_b.text().strip()
+        B_text = self.inp_B.text().strip()
+        T_a_display = float(self.inp_energy.text())
+        units = self.energy_units.currentText()
+        ax.set_title(
+            f"{a_text}({A_text},{b_text}){B_text}  T_a = {T_a_display:.1f} {units}"
+        )
+        ax.grid(True)
+        self.canvas.draw()
 
 
 def main():
