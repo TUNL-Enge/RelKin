@@ -12,6 +12,7 @@ from nuclear_kinematics.core.masses import get_mass_MeV, parse_nuclide
 from nuclear_kinematics.core.kinematics import (
     cm_energy, threshold_energy, lab_angle_energy, max_lab_angle,
     kinematic_locus, recoil_max_lab_angle, kinematic_compression,
+    lab_to_cm_solutions,
 )
 
 
@@ -136,3 +137,35 @@ class TestKinematicCompression:
         """kp < 0 at theta_cm ~ pi/2 for p+12C elastic (rho decreases with angle)."""
         kp = kinematic_compression(np.pi / 2, mP, m12C, mP, m12C, 100.0)
         assert kp[0] < 0
+
+
+class TestLabToCMSolutionsThetaBLab:
+    """Tests for theta_B_lab in lab_to_cm_solutions() output."""
+
+    def test_theta_B_lab_key_present(self):
+        """Every solution dict must contain 'theta_B_lab'."""
+        solutions = lab_to_cm_solutions(
+            np.radians(30.0), mP, m12C, mP, m12C, 100.0
+        )
+        assert len(solutions) >= 1
+        for sol in solutions:
+            assert 'theta_B_lab' in sol
+
+    def test_theta_B_lab_forward_hemisphere(self):
+        """B is always in the forward hemisphere (theta_B_lab < pi/2) for
+        normal kinematics with a light beam on a heavy target."""
+        solutions = lab_to_cm_solutions(
+            np.radians(30.0), mP, m12C, mP, m12C, 100.0
+        )
+        for sol in solutions:
+            assert sol['theta_B_lab'] >= 0.0
+            assert sol['theta_B_lab'] < np.pi / 2
+
+    def test_theta_B_lab_nonnegative(self):
+        """theta_B_lab is always >= 0 (arctan2 with positive pt_B_lab)."""
+        for theta_deg in [10.0, 30.0, 60.0]:
+            solutions = lab_to_cm_solutions(
+                np.radians(theta_deg), mP, m12C, mP, m12C, 100.0
+            )
+            for sol in solutions:
+                assert sol['theta_B_lab'] >= 0.0
