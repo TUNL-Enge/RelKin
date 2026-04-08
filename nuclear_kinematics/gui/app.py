@@ -4,6 +4,7 @@ import sys
 import numpy as np
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QComboBox,
     QGridLayout,
@@ -12,6 +13,8 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -21,6 +24,7 @@ from nuclear_kinematics.core.kinematics import (
     cm_energy,
     cm_kinetic_energies,
     kinematic_compression,
+    kinematic_locus,
     lab_to_cm_solutions,
     max_lab_angle,
     threshold_energy,
