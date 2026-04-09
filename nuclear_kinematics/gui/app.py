@@ -183,6 +183,7 @@ class KinematicsApp(QWidget):
             "T_B_cm (MeV)",
             "\u03b8_B_cm (deg)",
             "kp (rad\u207b\u00b9)",
+            "QB\u03c1 (MeV/c)",
         ]
         self.results_table = QTableWidget(0, len(headers))
         self.results_table.setHorizontalHeaderLabels(headers)
@@ -289,6 +290,7 @@ class KinematicsApp(QWidget):
                 theta_B_cm_deg = 180.0 - theta_b_cm_deg
                 theta_B_lab_deg = np.degrees(sol['theta_B_lab'])
                 kp = kinematic_compression(sol["theta_b_cm"], m_a, m_A, m_b, m_B, T_a)[0]
+                p_b_lab = np.sqrt(max((sol['T_b_lab'] + m_b)**2 - m_b**2, 0.0))
 
                 values = [
                     f"{i + 1}",
@@ -301,6 +303,7 @@ class KinematicsApp(QWidget):
                     f"{T_B_cm:.4f}",
                     f"{theta_B_cm_deg:.4f}",
                     f"{kp:.4f}",
+                    f"{p_b_lab:.4f}",
                 ]
                 for col, val in enumerate(values):
                     item = QTableWidgetItem(val)
@@ -333,6 +336,6 @@ class KinematicsApp(QWidget):
 def main():
     app = QApplication(sys.argv)
     window = KinematicsApp()
-    window.resize(950, 800)
+    window.resize(800, 800)
     window.show()
     sys.exit(app.exec())
