@@ -336,6 +336,6 @@ class KinematicsApp(QWidget):
 def main():
     app = QApplication(sys.argv)
     window = KinematicsApp()
-    window.resize(800, 800)
+    window.resize(875, 800)
     window.show()
     sys.exit(app.exec())
