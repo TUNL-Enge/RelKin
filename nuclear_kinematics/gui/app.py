@@ -93,8 +93,8 @@ class KinematicsApp(QWidget):
 
         # Logo on the right
         logo_lbl = QLabel()
-        logo_path = os.path.join(os.path.dirname(__file__), "..", "..", "FENRISLogo-notext.png")
-        pixmap = QPixmap(os.path.normpath(logo_path))
+        logo_path = os.path.join(os.path.dirname(__file__), "FENRISLogo-notext.png")
+        pixmap = QPixmap(logo_path)
         logo_lbl.setPixmap(pixmap.scaledToHeight(100, Qt.TransformationMode.SmoothTransformation))
         logo_lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
         reaction_hbox.addWidget(logo_lbl)

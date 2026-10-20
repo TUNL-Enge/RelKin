@@ -2,7 +2,10 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 
 PYTHON=""
-for p in python3 python; do
+if [ -x "$DIR/.venv/bin/python" ]; then
+    PYTHON="$DIR/.venv/bin/python"
+fi
+[ -z "$PYTHON" ] && for p in python3 python; do
     if command -v "$p" >/dev/null 2>&1; then
         PYTHON="$p"
         break
@@ -14,4 +17,4 @@ if [ -z "$PYTHON" ]; then
     exit 1
 fi
 
-exec "$PYTHON" -m nuclear_kinematics "$@"
+cd "$DIR" && exec "$PYTHON" -m nuclear_kinematics "$@"

@@ -6,11 +6,12 @@ For reactions conserving Z, electron masses cancel exactly.
 For reactions changing Z (e.g. beta decay), a correction of
 (delta_Z * m_electron) applies but is not applied automatically here.
 """
+import csv
 import functools
 import re
+from importlib import resources
 
 import numpy as np
-import pandas as pd
 
 from .constants import U_TO_MEV
 
@@ -43,10 +44,15 @@ _SYMBOL_TO_Z = {s.upper(): i + 1 for i, s in enumerate(_SYMBOLS)}
 
 
 @functools.lru_cache(maxsize=1)
-def load_ame2020() -> pd.DataFrame:
-    """Load AME2020 mass table via nuclearmasses package. Cached after first call."""
-    from nuclearmasses.mass_table import MassTable
-    return MassTable().full_data.query("TableYear == 2020")
+def load_ame2020() -> dict[tuple[int, int], float]:
+    """Load the bundled AME2020 table as {(Z, A): mass excess in keV}. Cached after first call."""
+    table: dict[tuple[int, int], float] = {}
+    path = resources.files("nuclear_kinematics.data").joinpath("ame2020_mass_excess.csv")
+    with path.open(encoding="utf-8") as f:
+        rows = csv.DictReader(line for line in f if not line.startswith("#"))
+        for row in rows:
+            table[(int(row["Z"]), int(row["A"]))] = float(row["mass_excess_keV"])
+    return table
 
 
 def get_mass_MeV(Z: int, A: int) -> float:
@@ -58,11 +64,10 @@ def get_mass_MeV(Z: int, A: int) -> float:
 
     Raises KeyError if the nuclide is not in AME2020.
     """
-    df = load_ame2020()
-    row = df[(df["Z"] == Z) & (df["A"] == A)]
-    if row.empty:
-        raise KeyError(f"Nuclide Z={Z}, A={A} not found in AME2020")
-    delta_keV = float(row["AMEMassExcess"].iloc[0])
+    try:
+        delta_keV = load_ame2020()[(Z, A)]
+    except KeyError:
+        raise KeyError(f"Nuclide Z={Z}, A={A} not found in AME2020") from None
     # print(f"A = {A}; delta_keV = {delta_keV}")
     return A * U_TO_MEV + delta_keV / 1000.0
 

@@ -10,7 +10,6 @@ requires-python = ">=3.9"
 dependencies = [
     "vector",
     "hepunits",
-    "nuclearmasses",
     "numpy",
     "scipy",
     "PySide6",
@@ -23,6 +22,10 @@ nuclear-kinematics = "nuclear_kinematics.__main__:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["nuclear_kinematics*"]
+
+[tool.setuptools.package-data]
+"nuclear_kinematics.data" = ["*.csv"]
+"nuclear_kinematics.gui" = ["*.png"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
