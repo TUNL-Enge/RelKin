@@ -16,3 +16,8 @@ nuclear_kinematics.egg-info/
 
 # Logs
 ralph-logs/
+
+# Local development notes (kept out of the repo)
+specs/
+thoughts/
+RALPH_COMPLETE.txt
