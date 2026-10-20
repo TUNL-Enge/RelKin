@@ -2,7 +2,7 @@
 
 A desktop calculator for relativistic two-body nuclear reaction kinematics, `A(a,b)B`, using AME2020 atomic masses.
 
-![Screenshot of the app showing 12C(d,p)13C at 10 MeV](docs/screenshot.png)
+![Screenshot of the app showing 12C(d,p)13C*(3.854 MeV) at 10 MeV](docs/screenshot.png)
 
 ## Features
 
