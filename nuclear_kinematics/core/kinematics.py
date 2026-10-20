@@ -137,6 +137,10 @@ def lab_to_cm_solutions(
     beta  = p_a / (E_a + m_A)
     gamma = (E_a + m_A) / sqrts
 
+    # Below threshold: reaction is closed, no solutions
+    if s <= (m_b + m_B)**2:
+        return []
+
     num = (s - (m_b + m_B)**2) * (s - (m_b - m_B)**2)
     p_star   = np.sqrt(max(num, 0.0)) / (2.0 * sqrts)
     E_star_b = (s + m_b**2 - m_B**2) / (2.0 * sqrts)

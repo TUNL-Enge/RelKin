@@ -8,6 +8,7 @@ A desktop calculator for relativistic two-body nuclear reaction kinematics, `A(a
 
 - Enter nuclides in any common form: `p`, `d`, `t`, `a`, `12C`, `C12`, `208Pb`. The residual nucleus fills in automatically.
 - Beam energy in MeV or MeV/u.
+- Residual nucleus can be left in an excited state (E_x).
 - Global quantities: Q-value, √s, threshold energy for endothermic reactions, and the maximum ejectile lab angle (for inverse kinematics).
 - At a chosen lab angle, every kinematic solution for the ejectile and residual: lab and CM energies and angles, kinematic compression factor *k* = (1/ρ)(dρ/dθ) (used to set up magnetic spectrographs), and magnetic rigidity Bρ.
 - A plot of ejectile energy against lab angle (the kinematic locus).

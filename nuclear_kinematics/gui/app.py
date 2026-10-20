@@ -131,9 +131,18 @@ class KinematicsApp(QWidget):
         angle_layout.addWidget(self.inp_angle)
         angle_group.setLayout(angle_layout)
 
+        # Excitation energy of residual B
+        ex_group = QGroupBox("Excitation (B)")
+        ex_layout = QHBoxLayout()
+        ex_layout.addWidget(QLabel("E_x (B, MeV):"))
+        self.inp_ex = QLineEdit("0.0")
+        ex_layout.addWidget(self.inp_ex)
+        ex_group.setLayout(ex_layout)
+
         beam_angle_row = QHBoxLayout()
         beam_angle_row.addWidget(energy_group)
         beam_angle_row.addWidget(angle_group)
+        beam_angle_row.addWidget(ex_group)
         layout.addLayout(beam_angle_row)
 
         # Calculate + Move detector buttons
@@ -146,7 +155,7 @@ class KinematicsApp(QWidget):
         layout.addLayout(btn_row)
 
         for field in (self.inp_a, self.inp_A, self.inp_b, self.inp_B,
-                      self.inp_energy, self.inp_angle):
+                      self.inp_energy, self.inp_angle, self.inp_ex):
             field.returnPressed.connect(self.calc_btn.click)
 
         # Global metrics (scalar quantities)
@@ -241,7 +250,11 @@ class KinematicsApp(QWidget):
             m_a = get_mass_MeV(*ZA_a)
             m_A = get_mass_MeV(*ZA_A)
             m_b = get_mass_MeV(*ZA_b)
-            m_B = get_mass_MeV(*ZA_B)
+            Ex = float(self.inp_ex.text())
+            if Ex < 0:
+                raise ValueError("E_x must be ≥ 0")
+            # Excited residual: effective mass m_B + Ex
+            m_B = get_mass_MeV(*ZA_B) + Ex
 
             T_input = float(self.inp_energy.text())
             T_a = T_input * ZA_a[1] if self.energy_units.currentText() == "MeV/u" else T_input
@@ -254,7 +267,8 @@ class KinematicsApp(QWidget):
             return
 
         try:
-            Q       = qvalue(ZA_a, ZA_A, ZA_b, ZA_B)
+            Q_gs    = qvalue(ZA_a, ZA_A, ZA_b, ZA_B)
+            Q       = Q_gs - Ex
             sqrts   = cm_energy(m_a, m_A, T_a)
             T_thresh = threshold_energy(m_a, m_A, m_b, m_B)
             T_b_cm, T_B_cm = cm_kinetic_energies(m_b, m_B, sqrts)
@@ -265,7 +279,12 @@ class KinematicsApp(QWidget):
             return
 
         # --- Global metrics ---
-        self.lbl_qvalue.setText(f"{Q:+.4f} MeV")
+        if Ex > 0:
+            self.lbl_qvalue.setText(
+                f"{Q:+.4f} MeV  (Q_gs = {Q_gs:+.4f}, E_x = {Ex:.4f})"
+            )
+        else:
+            self.lbl_qvalue.setText(f"{Q:+.4f} MeV")
         self.lbl_sqrts.setText(f"{sqrts:.4f} MeV")
         self.lbl_thresh.setText(f"{T_thresh:.4f} MeV" if T_thresh > 0 else "N/A (exothermic)")
         self.lbl_maxang.setText(
@@ -312,9 +331,9 @@ class KinematicsApp(QWidget):
 
             self.results_table.resizeColumnsToContents()
 
-        self._update_plot(m_a, m_A, m_b, m_B, T_a)
+        self._update_plot(m_a, m_A, m_b, m_B, T_a, Ex)
 
-    def _update_plot(self, m_a, m_A, m_b, m_B, T_a):
+    def _update_plot(self, m_a, m_A, m_b, m_B, T_a, Ex=0.0):
         self.fig.clear()
         ax = self.fig.add_subplot(111)
         theta_deg, T_lab = kinematic_locus(m_a, m_A, m_b, m_B, T_a)
@@ -325,6 +344,8 @@ class KinematicsApp(QWidget):
         A_text = self.inp_A.text().strip()
         b_text = self.inp_b.text().strip()
         B_text = self.inp_B.text().strip()
+        if Ex > 0:
+            B_text += f"*({Ex:.3f} MeV)"
         T_a_display = float(self.inp_energy.text())
         units = self.energy_units.currentText()
         ax.set_title(

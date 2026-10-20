@@ -169,3 +169,29 @@ class TestLabToCMSolutionsThetaBLab:
             )
             for sol in solutions:
                 assert sol['theta_B_lab'] >= 0.0
+
+
+class TestExcitedResidual:
+    """Residual B in an excited state is handled via effective mass m_B + Ex."""
+
+    def test_ex_zero_unchanged(self):
+        sol0 = lab_to_cm_solutions(np.radians(30.0), mD, m12C, mP, m13C, 10.0)
+        solx = lab_to_cm_solutions(np.radians(30.0), mD, m12C, mP, m13C + 0.0, 10.0)
+        assert sol0 == solx
+
+    def test_ejectile_energy_drops_and_energy_conserved(self):
+        Ex = 3.854
+        T_a = 10.0
+        Q_gs = mD + m12C - mP - m13C
+        gs = lab_to_cm_solutions(np.radians(30.0), mD, m12C, mP, m13C, T_a)
+        ex = lab_to_cm_solutions(np.radians(30.0), mD, m12C, mP, m13C + Ex, T_a)
+        assert len(gs) == 1 and len(ex) == 1
+        drop = gs[0]['T_b_lab'] - ex[0]['T_b_lab']
+        # At fixed lab angle the drop is close to, but not exactly, Ex
+        assert 0.8 * Ex < drop < 1.2 * Ex
+        assert abs(ex[0]['T_b_lab'] + ex[0]['T_B_lab'] - (T_a + Q_gs - Ex)) < 1e-9
+
+    def test_inelastic_threshold(self):
+        # 12C(p,p')12C*(4.439): threshold ≈ Ex * (m_p + m_12C) / m_12C ≈ 4.81 MeV
+        T = threshold_energy(mP, m12C, mP, m12C + 4.439)
+        assert abs(T - 4.439 * (mP + m12C) / m12C) < 0.01
