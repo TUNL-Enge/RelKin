@@ -21,13 +21,13 @@ You need Python 3.9 or newer.
 Install with [pipx](https://pipx.pypa.io/) (recommended, as it keeps the app in its own environment):
 
 ```bash
-pipx install git+https://github.com/<your-username>/RelKin.git
+pipx install git+https://github.com/TUNL-Enge/RelKin.git
 ```
 
 or with pip:
 
 ```bash
-pip install git+https://github.com/<your-username>/RelKin.git
+pip install git+https://github.com/TUNL-Enge/RelKin.git
 ```
 
 Then start the app:
@@ -39,7 +39,7 @@ nuclear-kinematics
 ## Development
 
 ```bash
-git clone https://github.com/<your-username>/RelKin.git
+git clone https://github.com/TUNL-Enge/RelKin.git
 cd RelKin
 python3 -m venv .venv
 .venv/bin/pip install -e . pytest
